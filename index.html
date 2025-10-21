@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz Mestre</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Super Quiz Online</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body>
-  <div id="quiz-container">
-    <h1>🎯 Quiz Mestre</h1>
-    <div id="question-box">
-      <p id="question">A carregar pergunta...</p>
-      <div id="answers"></div>
-    </div>
-    <div id="controls">
-      <p id="score">Pontuação: 0</p>
-      <button id="next-btn" disabled>Próxima</button>
-    </div>
-  </div>
+<body class="dark">
+  <header>
+    <h1>🎯 Super Quiz Online</h1>
+    <button id="theme-toggle">🌓</button>
+  </header>
 
-  <div id="end-screen" class="hidden">
-    <h2>🏆 Fim do Quiz!</h2>
+  <section id="start-screen">
+    <h2>Bem-vindo ao Super Quiz Online!</h2>
+    <input type="text" id="player-name" placeholder="Digite seu nome" />
+    <button id="start-btn">Começar</button>
+  </section>
+
+  <section id="quiz-container" class="hidden">
+    <div id="question"></div>
+    <div id="answers"></div>
+    <button id="next-btn" disabled>Próxima</button>
+    <p id="score">Pontuação: 0</p>
+    <audio id="bg-music" loop src="assets/music.mp3"></audio>
+    <button id="music-toggle">🔈 Música</button>
+  </section>
+
+  <section id="end-screen" class="hidden">
+    <h2>Fim do Quiz!</h2>
     <p id="final-score"></p>
-    <button id="restart-btn">Jogar novamente</button>
-  </div>
+    <p id="final-message"></p>
+    <button id="restart-btn">Jogar Novamente</button>
+    <h3>🏆 Ranking</h3>
+    <ul id="ranking-list"></ul>
+  </section>
 
-  <audio id="correct-sound" src="sounds/correct.mp3"></audio>
-  <audio id="wrong-sound" src="sounds/wrong.mp3"></audio>
-
+  <audio id="correct-sound" src="assets/correct.mp3"></audio>
+  <audio id="wrong-sound" src="assets/wrong.mp3"></audio>
   <script src="script.js"></script>
 </body>
 </html>
