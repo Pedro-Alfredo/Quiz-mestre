@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz Mestre</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="quiz-container">
+    <h1>🎯 Quiz Mestre</h1>
+    <div id="question-box">
+      <p id="question">A carregar pergunta...</p>
+      <div id="answers"></div>
+    </div>
+    <div id="controls">
+      <p id="score">Pontuação: 0</p>
+      <button id="next-btn" disabled>Próxima</button>
+    </div>
+  </div>
+
+  <div id="end-screen" class="hidden">
+    <h2>🏆 Fim do Quiz!</h2>
+    <p id="final-score"></p>
+    <button id="restart-btn">Jogar novamente</button>
+  </div>
+
+  <audio id="correct-sound" src="sounds/correct.mp3"></audio>
+  <audio id="wrong-sound" src="sounds/wrong.mp3"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
