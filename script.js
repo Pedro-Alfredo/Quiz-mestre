@@ -1,69 +1,66 @@
 const startScreen = document.getElementById('start-screen');
-const quizContainer = document.getElementById('quiz-container');
-const endScreen = document.getElementById('end-screen');
-const questionBox = document.getElementById('question');
-const answersBox = document.getElementById('answers');
+const quizScreen = document.getElementById('quiz-screen');
+const playerNameInput = document.getElementById('playerName');
+const startBtn = document.getElementById('startBtn');
+const questionEl = document.getElementById('question');
+const answersEl = document.getElementById('answers');
+const scoreEl = document.getElementById('score');
 const nextBtn = document.getElementById('next-btn');
-const scoreText = document.getElementById('score');
-const finalScore = document.getElementById('final-score');
-const finalMessage = document.getElementById('final-message');
-const rankingList = document.getElementById('ranking-list');
-const restartBtn = document.getElementById('restart-btn');
-const startBtn = document.getElementById('start-btn');
-const playerNameInput = document.getElementById('player-name');
-const bgMusic = document.getElementById('bg-music');
-const musicToggle = document.getElementById('music-toggle');
+const musicBtn = document.getElementById('music-btn');
 const themeToggle = document.getElementById('theme-toggle');
-const correctSound = document.getElementById('correct-sound');
-const wrongSound = document.getElementById('wrong-sound');
 
-let questions = [];
-let currentQuestionIndex = 0;
-let score = 0;
 let playerName = '';
+let currentQuestion = {};
+let score = 0;
+let music = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_fecf42f9a7.mp3?filename=gaming-music-loop-112191.mp3');
+music.loop = true;
 
-// Iniciar quiz
 startBtn.onclick = () => {
-  playerName = playerNameInput.value.trim() || 'Jogador';
-  startScreen.classList.add('hidden');
-  quizContainer.classList.remove('hidden');
-  fetchQuestions();
-  bgMusic.play();
+  playerName = playerNameInput.value.trim();
+  if (!playerName) return alert('Por favor, escreve o teu nome.');
+  startScreen.classList.remove('active');
+  quizScreen.classList.add('active');
+  loadQuestion();
 };
 
-// Alternar música
-musicToggle.onclick = () => {
-  if (bgMusic.paused) {
-    bgMusic.play();
-  } else {
-    bgMusic.pause();
-  }
+musicBtn.onclick = () => {
+  if (music.paused) music.play(); else music.pause();
 };
 
-// Alternar tema
 themeToggle.onclick = () => {
-  document.body.classList.toggle('light');
-  document.body.classList.toggle('dark');
+  document.body.classList.toggle('light-mode');
 };
 
-// Buscar perguntas da API e traduzir
-async function fetchQuestions() {
-  const res = await fetch('https://opentdb.com/api.php?amount=10&category=9&type=multiple');
+nextBtn.onclick = () => {
+  loadQuestion();
+};
+
+async function loadQuestion() {
+  answersEl.innerHTML = 'Carregando...';
+  const res = await fetch('https://opentdb.com/api.php?amount=1&type=multiple');
   const data = await res.json();
-  const translated = await Promise.all(
-    data.results.map(async q => {
-      const question = await translateText(decodeHTML(q.question));
-      const correct = await translateText(decodeHTML(q.correct_answer));
-      const incorrects = await Promise.all(q.incorrect_answers.map(a => translateText(decodeHTML(a))));
-      return {
-        question,
-        correct,
-        answers: shuffle([correct, ...incorrects])
-      };
-    })
-  );
-  questions = translated;
+  currentQuestion = data.results[0];
   showQuestion();
+}
+
+function showQuestion() {
+  const q = currentQuestion;
+  questionEl.innerHTML = decodeHTML(q.question);
+  const options = [...q.incorrect_answers, q.correct_answer].sort(() => Math.random() - 0.5);
+  answersEl.innerHTML = '';
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.textContent = decodeHTML(opt);
+    btn.onclick = () => checkAnswer(opt === q.correct_answer);
+    answersEl.appendChild(btn);
+  });
+}
+
+function checkAnswer(correct) {
+  if (correct) score += 1;
+  scoreEl.textContent = 'Pontuação: ' + score;
+  saveRanking();
+  loadQuestion();
 }
 
 function decodeHTML(html) {
@@ -72,90 +69,8 @@ function decodeHTML(html) {
   return txt.value;
 }
 
-async function translateText(text) {
-  try {
-    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=en|pt`);
-    const data = await res.json();
-    return data.responseData.translatedText || text;
-  } catch {
-    return text;
-  }
-}
-
-function showQuestion() {
-  nextBtn.disabled = true;
-  const q = questions[currentQuestionIndex];
-  questionBox.textContent = q.question;
-  answersBox.innerHTML = '';
-  q.answers.forEach(answer => {
-    const btn = document.createElement('button');
-    btn.textContent = answer;
-    btn.onclick = () => selectAnswer(btn, q.correct);
-    answersBox.appendChild(btn);
-  });
-}
-
-function selectAnswer(button, correctAnswer) {
-  Array.from(answersBox.children).forEach(btn => btn.disabled = true);
-  if (button.textContent === correctAnswer) {
-    button.classList.add('correct');
-    score++;
-    correctSound.play();
-  } else {
-    button.classList.add('wrong');
-    wrongSound.play();
-  }
-  scoreText.textContent = `Pontuação: ${score}`;
-  nextBtn.disabled = false;
-}
-
-nextBtn.onclick = () => {
-  currentQuestionIndex++;
-  if (currentQuestionIndex < questions.length) showQuestion();
-  else endQuiz();
-};
-
-function endQuiz() {
-  quizContainer.classList.add('hidden');
-  endScreen.classList.remove('hidden');
-  finalScore.textContent = `${playerName}, acertaste ${score} de ${questions.length} perguntas!`;
-
-  const ratio = score / questions.length;
-  if (ratio === 1) finalMessage.textContent = "Perfeito! És um génio! 🧠";
-  else if (ratio >= 0.7) finalMessage.textContent = "Excelente trabalho! 💪";
-  else if (ratio >= 0.4) finalMessage.textContent = "Bom esforço! Continua a praticar. 🙂";
-  else finalMessage.textContent = "Precisas treinar mais. 😅";
-
-  saveScore();
-  renderRanking();
-}
-
-restartBtn.onclick = () => {
-  score = 0;
-  currentQuestionIndex = 0;
-  endScreen.classList.add('hidden');
-  quizContainer.classList.remove('hidden');
-  scoreText.textContent = 'Pontuação: 0';
-  fetchQuestions();
-};
-
-function saveScore() {
-  const ranking = JSON.parse(localStorage.getItem('quizRanking')) || [];
-  ranking.push({ name: playerName, score, date: new Date().toLocaleString() });
-  ranking.sort((a, b) => b.score - a.score);
-  localStorage.setItem('quizRanking', JSON.stringify(ranking.slice(0, 5)));
-}
-
-function renderRanking() {
-  const ranking = JSON.parse(localStorage.getItem('quizRanking')) || [];
-  rankingList.innerHTML = '';
-  ranking.forEach(r => {
-    const li = document.createElement('li');
-    li.textContent = `${r.name}: ${r.score} pontos (${r.date})`;
-    rankingList.appendChild(li);
-  });
-}
-
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
+function saveRanking() {
+  const ranking = JSON.parse(localStorage.getItem('ranking') || '[]');
+  ranking.push({ name: playerName, score: score, date: new Date().toLocaleString() });
+  localStorage.setItem('ranking', JSON.stringify(ranking));
 }
