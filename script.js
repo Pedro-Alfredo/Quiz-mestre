@@ -37,7 +37,9 @@ nextBtn.onclick = () => {
 
 async function loadQuestion() {
   answersEl.innerHTML = 'Carregando...';
-  const res = await fetch('https://opentdb.com/api.php?amount=1&type=multiple');
+  const difficulties = ['easy', 'medium', 'hard'];
+  const diff = difficulties[Math.floor(Math.random() * difficulties.length)];
+  const res = await fetch(`https://opentdb.com/api.php?amount=1&category=18&difficulty=${diff}&type=multiple`);
   const data = await res.json();
   currentQuestion = data.results[0];
   showQuestion();
